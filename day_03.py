@@ -21,21 +21,19 @@ def read_file(path) -> list[str]:
     return [l.strip() for l in data]
 
 
-def shift_row(tree_row: deque[str], step: int, right: int) -> deque[str]:
-    """Pagriež rindu par x"""
-    shift = step * -right
-    tree_row.rotate(shift)
-    return tree_row
+def check_position(tree_row: str, row: int, right: int) -> deque[str]:
+    """Atlasa pozīciju no rindas kurā nonācis rūķis"""
+    position = (row * right) % len(tree_row)
+    return tree_row[position]
 
 
 def slope_trees(inputs: list[str], right: int) -> int:
     """
-    Izstaigā mežu pārvieotjoties vienu rindu uz leju un trīs pa labi
+    Izstaigā mežu pārvieotjoties uz leju un pa labi
     Atgriež ceļā sastapto koku skatu
     """
     path = [
-        shift_row(tree_row=deque(row), step=i, right=right)[0]
-        for i, row in enumerate(inputs, start=0)
+        check_position(tree_row=row, row=i, right=right) for i, row in enumerate(inputs)
     ]
 
     return path.count("#")
