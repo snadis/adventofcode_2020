@@ -1,4 +1,3 @@
-from collections import deque
 from math import prod
 
 inputs_test = """..##.......
@@ -21,7 +20,7 @@ def read_file(path) -> list[str]:
     return [l.strip() for l in data]
 
 
-def check_position(tree_row: str, row: int, right: int) -> deque[str]:
+def check_position(tree_row: str, row: int, right: int) -> str:
     """Atlasa pozīciju no rindas kurā nonācis rūķis"""
     position = (row * right) % len(tree_row)
     return tree_row[position]
