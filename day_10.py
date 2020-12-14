@@ -71,30 +71,27 @@ def jolt_differences_1_3(inputs: str):
     return jolt_differences[1] * (jolt_differences[3] + 1)
 
 
-def make_adapter_paths(
-    bag, current_adapter: int, path: list[int], paths=list[list[int]]
-) -> list[list[int]]:
+def make_adapter_paths(bag: list[int]) -> int:
 
     # print(f"ca:{current_adapter}, path={path}")
-    global adapter_paths
+    num_paths: int = 0
     target_adapter = max(bag)
-    # bag.sort()
+    bag.sort()
 
-    if not path:
-        path = []
+    @lru_cache
+    def find_path(current_adapter: int, path: tuple[int]):
+        nonlocal num_paths
+        if current_adapter == target_adapter:
+            num_paths += 1
 
-    if current_adapter == target_adapter:
-        adapter_paths.append(path)
+        for adapter in bag:
+            if current_adapter < adapter <= current_adapter + 3:
+                next_path = path + (adapter,)
+                find_path(adapter, next_path)
 
-    if not current_adapter:
-        current_adapter = 0
-        path.append(current_adapter)
+    find_path(0, (0,))
 
-    for adapter in bag:
-        if current_adapter < adapter <= current_adapter + 3:
-            make_adapter_paths(bag, adapter, path + [adapter])
-
-    return adapter_paths
+    return num_paths
 
 
 assert jolt_differences_1_3(inputs=inputs_test_01) == 35
@@ -104,28 +101,9 @@ inputs = read_data("data/day_10.txt")
 answer_1 = jolt_differences_1_3(inputs=inputs)
 print(f"Jolt differences 1 * 3 = {answer_1}")
 
-adapter_paths = []
-assert (
-    len(
-        make_adapter_paths(
-            bag=parse_input(inputs_test_01), current_adapter=None, path=None, paths=None
-        )
-    )
-    == 8
-)
+assert (make_adapter_paths(bag=parse_input(inputs_test_01))) == 8
 
-adapter_paths = []
-assert (
-    len(
-        make_adapter_paths(
-            bag=parse_input(inputs_test_02), current_adapter=None, path=None, paths=None
-        )
-    )
-    == 19208
-)
+assert (make_adapter_paths(bag=parse_input(inputs_test_02))) == 19208
 
-
-adapter_paths = []
-make_adapter_paths(bag=parse_input(inputs), current_adapter=None, path=None, paths=None)
-answer_2 = len(adapter_paths)
+answer_2 = len(make_adapter_paths(bag=parse_input(inputs)))
 print(f"Number of distinct ways you can arrange the adapters: {answer_2}")
