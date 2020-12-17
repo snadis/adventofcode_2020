@@ -1,5 +1,6 @@
 from collections import defaultdict
-from functools import lru_cache
+from math import prod
+from typing import List
 
 inputs_test_01 = """16
 10
@@ -71,27 +72,49 @@ def jolt_differences_1_3(inputs: str):
     return jolt_differences[1] * (jolt_differences[3] + 1)
 
 
-def make_adapter_paths(bag: list[int]) -> int:
+def make_adapter_groups(bags: List[int]) -> List[List[int]]:
+    target = max(bags)
+    groups = [[target]]
 
-    # print(f"ca:{current_adapter}, path={path}")
-    num_paths: int = 0
-    target_adapter = max(bag)
-    bag.sort()
+    while True:
 
-    @lru_cache
-    def find_path(current_adapter: int, path: tuple[int]):
-        nonlocal num_paths
-        if current_adapter == target_adapter:
-            num_paths += 1
+        group = [i for i in bags if target - 3 <= i < target]
+        groups.append(group)
 
-        for adapter in bag:
-            if current_adapter < adapter <= current_adapter + 3:
-                next_path = path + (adapter,)
-                find_path(adapter, next_path)
+        target = min(group)
 
-    find_path(0, (0,))
+        if target == min(bags):
+            break
 
-    return num_paths
+    groups.append([0])
+
+    return groups
+
+
+def convert_groups_to_combinations(groups: List[List[int]]) -> List[int]:
+    combinations = []
+    for i, group in enumerate(groups[:-1]):
+        group_size = len(group)
+        if group_size < 3:
+            combinations.append(group_size)
+        else:
+            next_group_max = max(groups[i + 1])
+            group_numbers_can_be_first = len(
+                [i for i in group if next_group_max + 3 >= i]
+            )
+            if group_numbers_can_be_first == 3:
+                combinations.append(7)
+            elif group_numbers_can_be_first == 1:
+                combinations.append(4)
+    return combinations
+
+
+def calculate_adapter_paths(inputs: str) -> int:
+    bags = parse_input(inputs=inputs)
+    groups = make_adapter_groups(bags=bags)
+    combinations = convert_groups_to_combinations(groups=groups)
+
+    return prod(combinations)
 
 
 assert jolt_differences_1_3(inputs=inputs_test_01) == 35
@@ -101,9 +124,9 @@ inputs = read_data("data/day_10.txt")
 answer_1 = jolt_differences_1_3(inputs=inputs)
 print(f"Jolt differences 1 * 3 = {answer_1}")
 
-assert (make_adapter_paths(bag=parse_input(inputs_test_01))) == 8
+assert calculate_adapter_paths(inputs=inputs_test_01) == 8
+assert calculate_adapter_paths(inputs=inputs_test_02) == 19208
 
-assert (make_adapter_paths(bag=parse_input(inputs_test_02))) == 19208
 
-answer_2 = len(make_adapter_paths(bag=parse_input(inputs)))
+answer_2 = calculate_adapter_paths(inputs=inputs)
 print(f"Number of distinct ways you can arrange the adapters: {answer_2}")
