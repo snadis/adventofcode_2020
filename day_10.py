@@ -117,6 +117,28 @@ def calculate_adapter_paths(inputs: str) -> int:
     return prod(combinations)
 
 
+def find_paths(inputs: str) -> int:
+    bag = parse_input(inputs=inputs)
+    bag.append(max(bag) + 3)
+    bag.sort()
+
+    paths_to = defaultdict(int)
+    paths_to[0] = 1
+
+    for adapter in bag:
+
+        if adapter - 1 in paths_to:
+            paths_to[adapter] += paths_to[adapter - 1]
+
+        if adapter - 2 in paths_to:
+            paths_to[adapter] += paths_to[adapter - 2]
+
+        if adapter - 3 in paths_to:
+            paths_to[adapter] += paths_to[adapter - 3]
+
+    return max(paths_to.values())
+
+
 assert jolt_differences_1_3(inputs=inputs_test_01) == 35
 assert jolt_differences_1_3(inputs=inputs_test_02) == 22 * 10
 
@@ -127,6 +149,11 @@ print(f"Jolt differences 1 * 3 = {answer_1}")
 assert calculate_adapter_paths(inputs=inputs_test_01) == 8
 assert calculate_adapter_paths(inputs=inputs_test_02) == 19208
 
+assert find_paths(inputs=inputs_test_01) == 8
+assert find_paths(inputs=inputs_test_02) == 19208
 
 answer_2 = calculate_adapter_paths(inputs=inputs)
 print(f"Number of distinct ways you can arrange the adapters: {answer_2}")
+
+answer_2_2 = calculate_adapter_paths(inputs=inputs)
+print(f"Otrs veids: {answer_2_2}")
